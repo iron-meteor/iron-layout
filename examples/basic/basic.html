@@ -1,0 +1,23 @@
+<head>
+  <title>basic</title>
+</head>
+
+<body>
+  {{#UI.dynamic}}
+    what happens here
+  {{/UI.dynamic}}
+</body>
+
+<template name="layout">
+  <h1>Layout</h1>
+
+  {{> yield "footer"}}
+</template>
+
+<template name="one">
+  one {{title}}
+</template>
+
+<template name="two">
+  two {{title}}
+</template>
