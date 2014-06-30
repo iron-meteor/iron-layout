@@ -1,3 +1,6 @@
+/**
+ * Find the first Layout in the rendered parent hierarchy.
+ */
 findFirstLayout = function (cmp) {
   while (cmp) {
     if (cmp.kind === 'Iron.Layout')
@@ -9,6 +12,13 @@ findFirstLayout = function (cmp) {
   return null;
 };
 
+/**
+ * Layout inherits from Iron.DynamicTemplate and provides the ability to create
+ * regions that a user can render templates or content blocks into. The layout
+ * and each region is an instance of DynamicTemplate so the template and data
+ * contexts are completely dynamic and programmable in javascript.
+ *
+ */
 var Layout = function (options) {
   Layout.__super__.constructor.apply(this, arguments);
   this.kind = 'Iron.Layout';
@@ -126,6 +136,18 @@ UI.registerHelper('contentFor', UI.Component.extend({
   }
 }));
 
+/**
+ * Let people use Layout directly from their templates!
+ *
+ * Example:
+ *  {{#Layout template="MyTemplate"}}
+ *    Main content goes here
+ *
+ *    {{#contentFor "footer"}}
+ *      footer goes here
+ *    {{/contentFor}}
+ *  {{/Layout}}
+ */
 UI.registerHelper('Layout', UI.Component.extend({
   render: function () {
     var layout = new Layout({
@@ -138,5 +160,8 @@ UI.registerHelper('Layout', UI.Component.extend({
   }
 }));
 
+/**
+ * Namespacing
+ */
 Iron = Iron || {};
 Iron.Layout = Layout;
