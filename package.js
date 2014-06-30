@@ -10,6 +10,7 @@ Package.on_use(function (api) {
   api.use('templating');
 
   api.add_files('dynamic-template/dynamic_template.js', 'client');
+  api.add_files('layout/layout.js', 'client');
 
   api.export('Iron', 'client');
 });

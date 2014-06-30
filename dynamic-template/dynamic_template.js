@@ -1,3 +1,4 @@
+//XXX use parent data context if data not set!
 var DynamicTemplate = function (options) {
   options = options || {};
   this._template = options.template;
@@ -33,7 +34,11 @@ DynamicTemplate.prototype.create = function (options) {
 
   return UI.Component.extend({
     data: function () {
-      return self.data();
+      // do we have a data context directly set on us?
+      if (typeof self._data !== 'undefined') {
+        var result = self.data();
+        return result;
+      }
     },
 
     render: function () {
@@ -83,10 +88,14 @@ DynamicTemplate.prototype.insert = function (options) {
 Iron = Iron || {};
 Iron.DynamicTemplate = DynamicTemplate;
 
+//XXX maybe override findComponentWithData
 UI.registerHelper('DynamicTemplate', UI.Component.extend({
   render: function () {
     var template = new DynamicTemplate({
-      template: this.lookup('template'), 
+      template: this.lookup('template'),
+
+      // this will always be a function so we need another way of determining if
+      // data has been set after we have its return value.
       data: this.lookup('data')
     });
 

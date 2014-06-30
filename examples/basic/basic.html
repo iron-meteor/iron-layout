@@ -3,9 +3,9 @@
 </head>
 
 <body>
-  <div id="mySel" style="background: orange; width: 500px; height: 500px;">
-    
-  </div>
+  {{#with getData}}
+    {{> DynamicTemplate template="LayoutOne"}}
+  {{/with}}
 </body>
 
 <template name="LayoutOne">
