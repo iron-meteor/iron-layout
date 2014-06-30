@@ -17,7 +17,6 @@ findFirstLayout = function (cmp) {
  * regions that a user can render templates or content blocks into. The layout
  * and each region is an instance of DynamicTemplate so the template and data
  * contexts are completely dynamic and programmable in javascript.
- *
  */
 var Layout = function (options) {
   Layout.__super__.constructor.apply(this, arguments);
@@ -34,17 +33,28 @@ DEFAULT_REGION = Layout.DEFAULT_REGION = 'main';
 
 Meteor._inherits(Layout, Iron.DynamicTemplate);
 
+/**
+ * Return the DynamicTemplate instance for a given region. If the region doesn't
+ * exist it is created.
+ *
+ * The regions object looks like this:
+ *
+ *  {
+ *    "main": DynamicTemplate,
+ *    "footer": DynamicTemplate,
+ *    .
+ *    .
+ *    .
+ *  }
+ */
 Layout.prototype.region = function (name, options) {
-  // creates a region if it doesn't exist already
-  // like this:
-  //   {
-  //     "main": DynamicTemplate,
-  //     "footer": DynamicTemplate,
-  //     <region>: <new Dynamic Template>
-  //   }
   return this._ensureRegion(name, options);
 };
 
+/**
+ * Render a template or content block into a given region or the main region by
+ * default.
+ */
 Layout.prototype.render = function (template, options) {
   // having options is usually good
   options = options || {};
@@ -55,6 +65,8 @@ Layout.prototype.render = function (template, options) {
   // get the DynamicTemplate for this region
   var dynamicTemplate = this.region(region);
 
+  this._storeRenderedRegion(region);
+
   // set the template value for the dynamic template
   dynamicTemplate.template(template);
 
@@ -62,6 +74,24 @@ Layout.prototype.render = function (template, options) {
   // otherwise, leave it be.
   if (options.data)
     dynamicTemplate.data(options.data);
+};
+
+Layout.prototype.beginRendering = function () {
+  if (this._renderedRegions)
+    throw new Error("You called beginRendering again before calling endRendering");
+  this._renderedRegions = {};
+};
+
+Layout.prototype._storeRenderedRegion = function (region) {
+  if (!this._renderedRegions)
+    return;
+  this._renderedRegions[region] = true;
+};
+
+Layout.prototype.endRendering = function () {
+  var renderedRegions = this._renderedRegions;
+  this._renderedRegions = null;
+  return renderedRegions;
 };
 
 Layout.prototype._ensureRegion = function (name, options) {
