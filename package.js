@@ -1,15 +1,18 @@
 Package.describe({
-  summary: 'Dynamic layouts'
+  summary: 'Dynamic layouts with regions.'
 });
 
 Package.on_use(function (api) {
   api.use('ui');
-  api.use('spacebars');
-  api.use('jquery')
-  api.use('deps');
-  api.use('templating');
+
+  // for utils like Meteor._inherits
+  api.use('meteor');
+
+  // dynamic templates
   api.use('iron-dynamic-template');
+
   api.add_files('layout.js', 'client');
+
   api.export('Iron', 'client');
 });
 

@@ -1,0 +1,26 @@
+<head>
+  <title>app</title>
+</head>
+
+<body>
+</body>
+
+<template name="MyLayout">
+  <h1>My Layout</h1>
+
+  {{> yield}}
+
+  <footer>
+    {{> yield "footer"}}
+  </footer>
+</template>
+
+<template name="MainPage">
+  <article>
+    Main Page {{title}}
+  </article>
+
+  {{#contentFor "footer"}}
+    Footer stuff
+  {{/contentFor}}
+</template>
