@@ -31,6 +31,10 @@ var Layout = function (options) {
 
 DEFAULT_REGION = Layout.DEFAULT_REGION = 'main';
 
+/**
+ * Inherits from Iron.DynamicTemplate which gives us the ability to set the
+ * template and data context from JavaScript.
+ */
 Meteor._inherits(Layout, Iron.DynamicTemplate);
 
 /**
