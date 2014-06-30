@@ -9,8 +9,9 @@ Package.on_use(function (api) {
   api.use('deps');
   api.use('templating');
 
-  api.add_files('iron_layout.html', 'client');
-  api.add_files('iron_layout.js', 'client');
+  api.add_files('dynamic-template/dynamic_template.js', 'client');
+
+  api.export('Iron', 'client');
 });
 
 Package.on_test(function (api) {

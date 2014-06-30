@@ -3,21 +3,15 @@
 </head>
 
 <body>
-  {{#UI.dynamic}}
-    what happens here
-  {{/UI.dynamic}}
+  <div id="mySel" style="background: orange; width: 500px; height: 500px;">
+    
+  </div>
 </body>
 
-<template name="layout">
-  <h1>Layout</h1>
-
-  {{> yield "footer"}}
+<template name="LayoutOne">
+  <h1>Layout One {{this}}</h1>
 </template>
 
-<template name="one">
-  one {{title}}
-</template>
-
-<template name="two">
-  two {{title}}
+<template name="LayoutTwo">
+  <h1>Layout Two {{this}}</h1>
 </template>
