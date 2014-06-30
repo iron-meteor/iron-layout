@@ -18,7 +18,7 @@ findFirstLayout = function (cmp) {
  * and each region is an instance of DynamicTemplate so the template and data
  * contexts are completely dynamic and programmable in javascript.
  */
-var Layout = function (options) {
+Layout = function (options) {
   Layout.__super__.constructor.apply(this, arguments);
   this.kind = 'Iron.Layout';
   this._regions = {};
