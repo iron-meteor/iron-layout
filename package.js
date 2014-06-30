@@ -1,5 +1,7 @@
 Package.describe({
-  summary: 'Dynamic layouts with regions.'
+  name: 'iron-layout',
+  summary: 'Dynamic layout with support for rendering dynamic templates into regions.',
+  version: '0.1.0'
 });
 
 Package.on_use(function (api) {

@@ -13,6 +13,8 @@ findFirstLayout = function (cmp) {
 };
 
 /**
+ * Dynamically render templates into regions.
+ *
  * Layout inherits from Iron.DynamicTemplate and provides the ability to create
  * regions that a user can render templates or content blocks into. The layout
  * and each region is an instance of DynamicTemplate so the template and data
@@ -29,11 +31,14 @@ Layout = function (options) {
     this.render(options.content);
 };
 
+/**
+ * The default region for a layout where the main content will go.
+ */
 DEFAULT_REGION = Layout.DEFAULT_REGION = 'main';
 
 /**
  * Inherits from Iron.DynamicTemplate which gives us the ability to set the
- * template and data context from JavaScript.
+ * template and data context dynamically.
  */
 Meteor._inherits(Layout, Iron.DynamicTemplate);
 
@@ -69,7 +74,9 @@ Layout.prototype.render = function (template, options) {
   // get the DynamicTemplate for this region
   var dynamicTemplate = this.region(region);
 
-  this._storeRenderedRegion(region);
+  // if we're in a rendering transaction, track that we've rendered this
+  // particular region
+  this._trackRenderedRegion(region);
 
   // set the template value for the dynamic template
   dynamicTemplate.template(template);
@@ -86,7 +93,7 @@ Layout.prototype.beginRendering = function () {
   this._renderedRegions = {};
 };
 
-Layout.prototype._storeRenderedRegion = function (region) {
+Layout.prototype._trackRenderedRegion = function (region) {
   if (!this._renderedRegions)
     return;
   this._renderedRegions[region] = true;
@@ -102,6 +109,25 @@ Layout.prototype._ensureRegion = function (name, options) {
  return this._regions[name] = this._regions[name] || new Iron.DynamicTemplate(options);
 };
 
+/**
+ * Create a region in the closest layout ancestor.
+ *
+ * Examples:
+ *    <aside>
+ *      {{> yield "aside"}}
+ *    </aside>
+ *
+ *    <article>
+ *      {{> yield}}
+ *    </article>
+ *
+ *    <footer>
+ *      {{> yield "footer"}}
+ *    </footer>
+ *
+ * Note: The helper is a UI.Component object instead of a function so that
+ * Meteor UI does not create a Deps.Dependency.
+ */
 UI.registerHelper('yield', UI.Component.extend({
   render: function () {
     var layout = findFirstLayout(this);
@@ -109,7 +135,7 @@ UI.registerHelper('yield', UI.Component.extend({
     if (!layout)
       throw new Error("No Iron.Layout found so you can't use yield!");
 
-    // Example: {{> yield region="footer"}} or {{> yield "footer"}}
+    // Example options: {{> yield region="footer"}} or {{> yield "footer"}}
     var options = this.get();
     var region;
 
@@ -130,6 +156,9 @@ UI.registerHelper('yield', UI.Component.extend({
 }));
 
 /**
+ * Render a template into a region in the closest layout ancestor from within
+ * your template markup.
+ *
  * Examples:
  *
  *  {{#contentFor "footer"}}
@@ -137,6 +166,9 @@ UI.registerHelper('yield', UI.Component.extend({
  *  {{/contentFor}}
  *
  *  {{> contentFor region="footer" template="SomeTemplate" data=someData}}
+ *
+ * Note: The helper is a UI.Component object instead of a function so that
+ * Meteor UI does not create a Deps.Dependency.
  */
 UI.registerHelper('contentFor', UI.Component.extend({
   render: function () {
@@ -159,6 +191,10 @@ UI.registerHelper('contentFor', UI.Component.extend({
 
     // set the region to a provided template or the content directly.
     layout.region(region).template(template || content);
+
+    // tell the layout to track this as a rendered region if we're in a
+    // rendering transaction.
+    layout._trackRenderedRegion(region);
 
     // if we have some data then set the data context
     if (data)

@@ -6,7 +6,11 @@
 </body>
 
 <template name="MyLayout">
-  <h1>My Layout</h1>
+  <h1>My Layout: {{title}}</h1>
+
+  <aside>
+    {{> yield "aside"}}
+  </aside>
 
   {{> yield}}
 
@@ -17,8 +21,14 @@
 
 <template name="MainPage">
   <article>
-    Main Page {{title}}
+    <h3>
+      Main Page: {{title}}
+    </h3>
   </article>
+
+  {{#contentFor "aside"}}
+    Aside stuff
+  {{/contentFor}}
 
   {{#contentFor "footer"}}
     Footer stuff
