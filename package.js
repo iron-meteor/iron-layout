@@ -17,6 +17,9 @@ Package.on_use(function (api) {
   // dynamic templates
   api.use('iron-dynamic-template');
 
+  // if you use iron-layout you should get iron-dynamic-template for free!
+  api.imply('iron-dynamic-template');
+
   // if blaze-layout make sure it loads first so we can clean up after it.
   api.use('blaze-layout', {weak: true});
 
