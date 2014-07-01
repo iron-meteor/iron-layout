@@ -45,6 +45,8 @@ getInclusionArguments = function (cmp) {
  */
 Layout = function (options) {
   Layout.__super__.constructor.apply(this, arguments);
+
+  options = options || {};
   this.kind = 'Iron.Layout';
   this._regions = {};
 
@@ -123,6 +125,9 @@ Layout.prototype._trackRenderedRegion = function (region) {
 };
 
 Layout.prototype.endRendering = function () {
+  // force all rendering to complete
+  Deps.flush();
+
   var renderedRegions = this._renderedRegions;
   this._renderedRegions = null;
   return renderedRegions;
