@@ -2,13 +2,13 @@ Iron.Layout
 ==============================================================================
 Dynamic layout with support for rendering dynamic templates into regions.
 
-Iron.Layout is the page rendering engine for Iron.Router. But layouts can also
-be used independently for composing UI components. For example, your app might
-have a standard dialog box layout and you want to populate templates dynamically
+Iron.Layout is the page rendering engine for Iron.Router. Layouts can also
+be used independently for composing templates. For example, your app might
+have a standard dialog box layout and you want to populate content dynamically
 into the dialog box depending upon what kind of dialog it is.
 
 ## Install
-*Note: Not on atmosphere yet. For now, just use a Github clonse.*
+*Note: Not on atmosphere yet. For now, just use a Github clone.*
 
 ## Reusing Templates with a Layout
 
