@@ -123,3 +123,52 @@ Tinytest.add('Layout - JavaScript rendering transactions', function (test) {
     test.equal(renderedRegions, ['main', 'aside', 'footer']);
   });
 });
+
+Tinytest.add('Layout - has, clear and clearAll', function (test) {
+  var layout = new Iron.Layout({template: 'LayoutOne'});
+
+  withRenderedTemplate(layout.create(), function (tmpl, el) {
+    // just make sure we're starting off correctly
+    test.equal(el.innerHTML.compact(), 'layout-');
+
+    // we have a main region {{> yield}}
+    test.isTrue(layout.has());
+
+    // we also should have a footer region {{> yield "footer"}}
+    test.isTrue(layout.has('footer'));
+
+    // we should not have some bogus region
+    test.isFalse(layout.has('bogus'));
+
+    // render the One template into the main region
+    layout.render('One');
+    Deps.flush();
+
+    // now render Two into the footer region
+    layout.render('Two', {to: 'footer'});
+    Deps.flush();
+
+    // make sure everything rendered correctly
+    test.equal(el.innerHTML.compact(), 'layout-One--Two--');
+
+    // now clear footer region
+    layout.clear("footer");
+    Deps.flush();
+    test.equal(el.innerHTML.compact(), 'layout-One--');
+
+    // clear main region
+    layout.clear();
+    Deps.flush();
+    test.equal(el.innerHTML.compact(), 'layout-');
+
+    // now build it back up again and clearAll
+    layout.render('One');
+    layout.render('Two', {to: 'footer'});
+    Deps.flush();
+    test.equal(el.innerHTML.compact(), 'layout-One--Two--');
+
+    layout.clearAll();
+    Deps.flush();
+    test.equal(el.innerHTML.compact(), 'layout-');
+  });
+});

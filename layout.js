@@ -112,6 +112,40 @@ Layout.prototype.render = function (template, options) {
     dynamicTemplate.data(options.data);
 };
 
+/**
+ * Returns true if the given region is defined and false otherwise.
+ */
+Layout.prototype.has = function (region) {
+  region = region || Layout.DEFAULT_REGION;
+  return !!this._regions[region];
+};
+
+/**
+ * Clear a given region or the "main" region by default.
+ */
+Layout.prototype.clear = function (region) {
+  region = region || Layout.DEFAULT_REGION;
+
+  // we don't want to create a region if it didn't exist before
+  if (this.has(region))
+    this.region(region).template(null);
+
+  // chain it up
+  return this;
+};
+
+/**
+ * Clear all regions.
+ */
+Layout.prototype.clearAll = function () {
+  _.each(this._regions, function (dynamicTemplate) {
+    dynamicTemplate.template(null);
+  });
+
+  // chain it up
+  return this;
+};
+
 Layout.prototype.beginRendering = function () {
   if (this._renderedRegions)
     throw new Error("You called beginRendering again before calling endRendering");
