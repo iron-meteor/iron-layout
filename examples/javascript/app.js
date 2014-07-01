@@ -16,10 +16,13 @@ if (Meteor.isClient) {
       data: {title: 'Page Title'}
     });
 
+    layout.render('CustomAside', {
+      to: 'aside'
+    });
+
     Deps.flush();
 
     var renderedRegions = layout.endRendering();
     console.log(renderedRegions);
-
   });
 }

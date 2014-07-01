@@ -13,6 +13,29 @@ findFirstLayout = function (cmp) {
 };
 
 /**
+ * Get inclusion arguments if any.
+ *
+ * Uses the __isTemplateWith property set when a parent component is used
+ * specificially for a data context with inclusion args.
+ *
+ * Inclusion arguments are arguments provided in a template like this:
+ * {{> yield "inclusionArg"}}
+ * or
+ * {{> yield region="inclusionArgValue"}}
+ */
+getInclusionArguments = function (cmp) {
+  var parent = cmp && cmp.parent;
+
+  if (!parent)
+    return null;
+
+  if (parent.__isTemplateWith && parent.data)
+    return (typeof parent.data === 'function') ? parent.data() : parent.data;
+
+  return null;
+};
+
+/**
  * Dynamically render templates into regions.
  *
  * Layout inherits from Iron.DynamicTemplate and provides the ability to create
@@ -136,7 +159,7 @@ UI.registerHelper('yield', UI.Component.extend({
       throw new Error("No Iron.Layout found so you can't use yield!");
 
     // Example options: {{> yield region="footer"}} or {{> yield "footer"}}
-    var options = this.get();
+    var options = getInclusionArguments(this);
     var region;
 
     if (_.isString(options)) {

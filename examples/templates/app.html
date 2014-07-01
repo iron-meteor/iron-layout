@@ -3,11 +3,11 @@
 </head>
 
 <body>
-  {{#Layout template="MyLayout"}}
-    Main Content
+  {{#Layout template="MyLayout" data=getData}}
+    Main Content-{{this}}
 
     {{#contentFor "footer"}}
-      Footer stuff goes here!
+      Footer stuff goes here! {{this}}
     {{/contentFor}}
   {{/Layout}}
 </body>
