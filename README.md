@@ -101,7 +101,7 @@ if (Meteor.isClient) {
     
     // force a Deps.flush and get an object of
     // regions that have been rendered. In this case:
-    // => ["main", "header", "footer"]
+    // => {"main": true, "header": true, "footer": true}
     var renderedRegions = layout.endRendering();
   });
 }
