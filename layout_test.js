@@ -183,3 +183,38 @@ Tinytest.add('Layout - default layout', function (test) {
     test.equal(el.innerHTML.compact(), 'plain', 'no default layout');
   });
 });
+
+Tinytest.add('Layout - onRenderRegion hook', function (test) {
+  // no default template
+  var layout = new Iron.Layout({template: 'LayoutOne'});
+  var calls = [];
+
+  layout.onRenderRegion(function (layout, region, tmpl, cmp) {
+    calls.push({
+      layout: layout,
+      region: region,
+      tmpl: tmpl,
+      cmp: cmp
+    });
+  });
+
+  withRenderedTemplate(layout.create(), function (tmpl, el) {
+    //initial regions are "main" and "footer" and both should be rendered with
+    //null templates.
+    test.equal(calls.length, 2);
+
+    var call = calls[0];
+    test.equal(call.layout, layout);
+    test.equal(call.region, "main");
+    test.instanceOf(call.tmpl, Iron.DynamicTemplate);
+    test.instanceOf(call.cmp, Object);
+   
+    layout.render('Plain');
+    Deps.flush();
+    test.equal(calls.length, 3);
+
+    layout.render('Footer', {to: 'footer'});
+    Deps.flush();
+    test.equal(calls.length, 4);
+  });
+});

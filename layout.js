@@ -44,12 +44,14 @@ getInclusionArguments = function (cmp) {
  * contexts are completely dynamic and programmable in javascript.
  */
 Layout = function (options) {
+  var self = this;
+
   Layout.__super__.constructor.apply(this, arguments);
 
   options = options || {};
   this.kind = 'Iron.Layout';
   this._regions = {};
-
+  this._hooks = {};
   this.defaultTemplate('__IronDefaultLayout__');
 
   // if there's block content then render that
@@ -169,8 +171,46 @@ Layout.prototype.endRendering = function () {
   return renderedRegions;
 };
 
+/**
+ * Call the callback when a region template is rendered.
+ *
+ * callback(layout, regionName, dynamicTemplate, component)
+ */
+Layout.prototype.onRenderRegion = function (callback) {
+  var hooks = this._hooks['onRenderRegion'] = this._hooks['onRenderRegion'] || [];
+  hooks.push(callback);
+  return this;
+};
+
 Layout.prototype._ensureRegion = function (name, options) {
- return this._regions[name] = this._regions[name] || new Iron.DynamicTemplate(options);
+ return this._regions[name] = this._regions[name] || this._createDynamicTemplate(name, options);
+};
+
+Layout.prototype._createDynamicTemplate = function (name, options) {
+  var self = this;
+  var tmpl = new Iron.DynamicTemplate(options);
+
+  tmpl.onRender(function (dynamicTemplate, component) {
+    self._runHooks('onRenderRegion', self, name, dynamicTemplate, component); 
+  });
+
+  return tmpl;
+};
+
+/**
+ * Run hook functions for a given hook name.
+ *
+ * hooks['onRender'] = [fn1, fn2, fn3]
+ */
+Layout.prototype._runHooks = function (name /*, args */) {
+  var args = _.toArray(arguments).slice(1);
+  var hooks = this._hooks[name] || [];
+  var hook;
+
+  for (var i = 0; i < hooks.length; i++) {
+    hook = hooks[i];
+    hook.apply(this, args);
+  }
 };
 
 /**
