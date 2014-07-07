@@ -172,3 +172,14 @@ Tinytest.add('Layout - has, clear and clearAll', function (test) {
     test.equal(el.innerHTML.compact(), 'layout-');
   });
 });
+
+Tinytest.add('Layout - default layout', function (test) {
+  // no default template
+  var layout = new Iron.Layout;
+
+  withRenderedTemplate(layout.create(), function (tmpl, el) {
+    layout.render('Plain');
+    Deps.flush();
+    test.equal(el.innerHTML.compact(), 'plain', 'no default layout');
+  });
+});

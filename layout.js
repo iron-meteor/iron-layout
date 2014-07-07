@@ -50,6 +50,8 @@ Layout = function (options) {
   this.kind = 'Iron.Layout';
   this._regions = {};
 
+  this.defaultTemplate('__IronDefaultLayout__');
+
   // if there's block content then render that
   // to the main region
   if (options.content)

@@ -6,6 +6,9 @@ Package.describe({
 });
 
 Package.on_use(function (api) {
+  // so our default_layout gets compiled
+  api.use('templating');
+
   api.use('ui');
 
   // for utils like Meteor._inherits
@@ -24,6 +27,7 @@ Package.on_use(function (api) {
   api.use('blaze-layout', {weak: true});
 
   api.add_files('blaze_layout_errors.js', ['client', 'server']);
+  api.add_files('default_layout.html', 'client');
   api.add_files('layout.js', 'client');
 
   api.export('Iron', 'client');
