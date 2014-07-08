@@ -17,6 +17,9 @@ Package.on_use(function (api) {
   // some utils
   api.use('underscore');
 
+  api.use('iron-core');
+  api.imply('iron-core');
+
   // dynamic templates
   api.use('iron-dynamic-template');
 

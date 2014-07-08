@@ -337,5 +337,4 @@ UI.registerHelper('Layout', UI.Component.extend({
 /**
  * Namespacing
  */
-Iron = Iron || {};
 Iron.Layout = Layout;
