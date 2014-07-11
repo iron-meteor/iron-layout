@@ -5,14 +5,14 @@ if (Meteor.isClient) {
     // insert into the body
     layout.insert();
     layout.template('MyLayout');
-    layout.render('MainPage');
+    layout.render('PageOne');
     layout.data({title: 'Layout Title'});
 
 
     layout.beginRendering();
 
     // now override it with a region specific data context
-    layout.render('MainPage', {
+    layout.render('PageOne', {
       data: {title: 'Page Title'}
     });
 

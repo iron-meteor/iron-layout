@@ -40,7 +40,7 @@ Layout = function (options) {
   options = options || {};
   this.kind = 'Iron.Layout';
   this._regions = {};
-  this._hooks = {};
+  this._regionHooks = {};
   this.defaultTemplate('__IronDefaultLayout__');
 
   // if there's block content then render that
@@ -160,13 +160,30 @@ Layout.prototype._trackRenderedRegion = function (region) {
  * Stop a rendering transaction and retrieve the rendered regions.
  */
 Layout.prototype.endRendering = function () {
-  // force all rendering to complete
   Deps.flush();
-
   var renderedRegions = this._renderedRegions;
   this._renderedRegions = null;
   return renderedRegions;
 };
+
+/**
+ * View lifecycle hooks for regions.
+ */
+_.each(
+  [
+    'onRegionCreated',
+    'onRegionMaterialized',
+    'onRegionRendered',
+    'onRegionDestroyed'
+  ], 
+  function (hook) {
+    Layout.prototype[hook] = function (cb) {
+      var hooks = this._regionHooks[hook] = this._regionHooks[hook] || [];
+      hooks.push(cb);
+      return this;
+    }
+  }
+);
 
 /**
  * Returns the DynamicTemplate for a given region or creates it if it doesn't
@@ -182,7 +199,32 @@ Layout.prototype._ensureRegion = function (name, options) {
 Layout.prototype._createDynamicTemplate = function (name, options) {
   var self = this;
   var tmpl = new Iron.DynamicTemplate(options);
+  var capitalize = Iron.utils.capitalize;
+  tmpl.region = name;
+
+  _.each(['created', 'materialized', 'rendered', 'destroyed'], function (hook) {
+    hook = capitalize(hook);
+    tmpl['on' + hook](function (dynamicTemplate) {
+      // "this" is the view instance
+      var view = this;
+      self._runRegionHooks('on' + 'Region' + hook, view, dynamicTemplate);
+    });
+  });
+
   return tmpl;
+};
+
+Layout.prototype._runRegionHooks = function (name, regionView, regionDynamicTemplate) {
+  var layout = this;
+  var hooks = this._regionHooks[name] || [];
+  var hook;
+
+  for (var i = 0; i < hooks.length; i++) {
+    hook = hooks[i];
+    // keep the "thisArg" pointing to the view, but make the first parameter to
+    // the callback teh dynamic template instance.
+    hook.call(regionView, regionDynamicTemplate.region, regionDynamicTemplate, this);
+  }
 };
 
 /*****************************************************************************/
@@ -255,6 +297,7 @@ UI.registerHelper('contentFor', Template.__create__('contentFor', function () {
   var content = this.templateContentBlock;
   var template = options.template;
   var data = options.data;
+  var region;
 
   if (_.isString(options))
     region = options;
