@@ -43,15 +43,15 @@ var withDiv = function (callback) {
 var withRenderedTemplate = function (template, callback) {
   withDiv(function (el) {
     template = _.isString(template) ? Template[template] : template;
-    var cmp = UI.render(template);
-    UI.insert(cmp, el);
+    var range = Blaze.render(template);
+    range.attach(el);
     Deps.flush();
-    callback(cmp, el);
+    callback(el);
   });
 };
 
 Tinytest.add('Layout - Template layout with block content', function (test) {
-  withRenderedTemplate('BlockLayout', function (tmpl, el) {
+  withRenderedTemplate('BlockLayout', function (el) {
     test.equal(el.innerHTML.compact(), 'layout-main-footer');
   });
 });
@@ -63,7 +63,7 @@ Template.BlockLayoutWithData.helpers({
 });
 
 Tinytest.add('Layout - Template layout with block content and data', function (test) {
-  withRenderedTemplate('BlockLayoutWithData', function (tmpl, el) {
+  withRenderedTemplate('BlockLayoutWithData', function (el) {
     test.equal(el.innerHTML.compact(), 'layout-data-main-data-footer-data');
   });
 });
@@ -71,7 +71,7 @@ Tinytest.add('Layout - Template layout with block content and data', function (t
 Tinytest.add('Layout - JavaScript layout', function (test) {
   var layout = new Iron.Layout;
 
-  withRenderedTemplate(layout.create(), function (tmpl, el) {
+  withRenderedTemplate(layout.create(), function (el) {
     // starts off empty
     test.equal(el.innerHTML.compact(), '');
 
@@ -111,7 +111,7 @@ Tinytest.add('Layout - JavaScript rendering transactions', function (test) {
   var layout = new Iron.Layout({template: 'RenderingTransactionsLayout'});
 
 
-  withRenderedTemplate(layout.create(), function (tmpl, el) {
+  withRenderedTemplate(layout.create(), function (el) {
     // start the transaction
     layout.beginRendering();
     // render the LayoutOnePage template into the main region
@@ -127,7 +127,7 @@ Tinytest.add('Layout - JavaScript rendering transactions', function (test) {
 Tinytest.add('Layout - has, clear and clearAll', function (test) {
   var layout = new Iron.Layout({template: 'LayoutOne'});
 
-  withRenderedTemplate(layout.create(), function (tmpl, el) {
+  withRenderedTemplate(layout.create(), function (el) {
     // just make sure we're starting off correctly
     test.equal(el.innerHTML.compact(), 'layout-');
 
@@ -177,44 +177,9 @@ Tinytest.add('Layout - default layout', function (test) {
   // no default template
   var layout = new Iron.Layout;
 
-  withRenderedTemplate(layout.create(), function (tmpl, el) {
+  withRenderedTemplate(layout.create(), function (el) {
     layout.render('Plain');
     Deps.flush();
     test.equal(el.innerHTML.compact(), 'plain', 'no default layout');
-  });
-});
-
-Tinytest.add('Layout - onRenderRegion hook', function (test) {
-  // no default template
-  var layout = new Iron.Layout({template: 'LayoutOne'});
-  var calls = [];
-
-  layout.onRenderRegion(function (layout, region, tmpl, cmp) {
-    calls.push({
-      layout: layout,
-      region: region,
-      tmpl: tmpl,
-      cmp: cmp
-    });
-  });
-
-  withRenderedTemplate(layout.create(), function (tmpl, el) {
-    //initial regions are "main" and "footer" and both should be rendered with
-    //null templates.
-    test.equal(calls.length, 2);
-
-    var call = calls[0];
-    test.equal(call.layout, layout);
-    test.equal(call.region, "main");
-    test.instanceOf(call.tmpl, Iron.DynamicTemplate);
-    test.instanceOf(call.cmp, Object);
-   
-    layout.render('Plain');
-    Deps.flush();
-    test.equal(calls.length, 3);
-
-    layout.render('Footer', {to: 'footer'});
-    Deps.flush();
-    test.equal(calls.length, 4);
   });
 });

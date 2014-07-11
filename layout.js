@@ -1,39 +1,28 @@
+/*****************************************************************************/
+/* Imports */
+/*****************************************************************************/
+var DynamicTemplate = Iron.DynamicTemplate;
+
+/*****************************************************************************/
+/* Helpers */
+/*****************************************************************************/
 /**
  * Find the first Layout in the rendered parent hierarchy.
  */
-findFirstLayout = function (cmp) {
-  while (cmp) {
-    if (cmp.kind === 'Iron.Layout')
-      return cmp.__dynamicTemplate__;
+findFirstLayout = function (view) {
+  while (view) {
+    if (view.kind === 'Iron.Layout')
+      return view.__dynamicTemplate__;
     else
-      cmp = cmp.parent;
+      view = view.parentView;
   }
 
   return null;
 };
 
-/**
- * Get inclusion arguments if any.
- *
- * Uses the __isTemplateWith property set when a parent component is used
- * specificially for a data context with inclusion args.
- *
- * Inclusion arguments are arguments provided in a template like this:
- * {{> yield "inclusionArg"}}
- * or
- * {{> yield region="inclusionArgValue"}}
- */
-getInclusionArguments = function (cmp) {
-  var parent = cmp && cmp.parent;
-
-  if (!parent)
-    return null;
-
-  if (parent.__isTemplateWith && parent.data)
-    return (typeof parent.data === 'function') ? parent.data() : parent.data;
-
-  return null;
-};
+/*****************************************************************************/
+/* Layout */
+/*****************************************************************************/
 
 /**
  * Dynamically render templates into regions.
@@ -90,8 +79,7 @@ Layout.prototype.region = function (name, options) {
 };
 
 /**
- * Render a template or content block into a given region or the main region by
- * default.
+ * Set the template for a region.
  */
 Layout.prototype.render = function (template, options) {
   // having options is usually good
@@ -150,18 +138,27 @@ Layout.prototype.clearAll = function () {
   return this;
 };
 
+/**
+ * Start tracking rendered regions.
+ */
 Layout.prototype.beginRendering = function () {
   if (this._renderedRegions)
     throw new Error("You called beginRendering again before calling endRendering");
   this._renderedRegions = {};
 };
 
+/**
+ * Track a rendered region if we're in a transaction.
+ */
 Layout.prototype._trackRenderedRegion = function (region) {
   if (!this._renderedRegions)
     return;
   this._renderedRegions[region] = true;
 };
 
+/**
+ * Stop a rendering transaction and retrieve the rendered regions.
+ */
 Layout.prototype.endRendering = function () {
   // force all rendering to complete
   Deps.flush();
@@ -172,46 +169,25 @@ Layout.prototype.endRendering = function () {
 };
 
 /**
- * Call the callback when a region template is rendered.
- *
- * callback(layout, regionName, dynamicTemplate, component)
+ * Returns the DynamicTemplate for a given region or creates it if it doesn't
+ * exists yet.
  */
-Layout.prototype.onRenderRegion = function (callback) {
-  var hooks = this._hooks['onRenderRegion'] = this._hooks['onRenderRegion'] || [];
-  hooks.push(callback);
-  return this;
-};
-
 Layout.prototype._ensureRegion = function (name, options) {
  return this._regions[name] = this._regions[name] || this._createDynamicTemplate(name, options);
 };
 
+/**
+ * Create a new DynamicTemplate instance.
+ */
 Layout.prototype._createDynamicTemplate = function (name, options) {
   var self = this;
   var tmpl = new Iron.DynamicTemplate(options);
-
-  tmpl.onRender(function (dynamicTemplate, component) {
-    self._runHooks('onRenderRegion', self, name, dynamicTemplate, component); 
-  });
-
   return tmpl;
 };
 
-/**
- * Run hook functions for a given hook name.
- *
- * hooks['onRender'] = [fn1, fn2, fn3]
- */
-Layout.prototype._runHooks = function (name /*, args */) {
-  var args = _.toArray(arguments).slice(1);
-  var hooks = this._hooks[name] || [];
-  var hook;
-
-  for (var i = 0; i < hooks.length; i++) {
-    hook = hooks[i];
-    hook.apply(this, args);
-  }
-};
+/*****************************************************************************/
+/* UI Helpers */
+/*****************************************************************************/
 
 /**
  * Create a region in the closest layout ancestor.
@@ -228,35 +204,30 @@ Layout.prototype._runHooks = function (name /*, args */) {
  *    <footer>
  *      {{> yield "footer"}}
  *    </footer>
- *
- * Note: The helper is a UI.Component object instead of a function so that
- * Meteor UI does not create a Deps.Dependency.
  */
-UI.registerHelper('yield', UI.Component.extend({
-  render: function () {
-    var layout = findFirstLayout(this);
+UI.registerHelper('yield', Template.__create__('yield', function () {
+  var layout = findFirstLayout(this);
 
-    if (!layout)
-      throw new Error("No Iron.Layout found so you can't use yield!");
+  if (!layout)
+    throw new Error("No Iron.Layout found so you can't use yield!");
 
-    // Example options: {{> yield region="footer"}} or {{> yield "footer"}}
-    var options = getInclusionArguments(this);
-    var region;
+  // Example options: {{> yield region="footer"}} or {{> yield "footer"}}
+  var options = DynamicTemplate.getInclusionArguments(this);
+  var region;
 
-    if (_.isString(options)) {
-      region = options;
-    } else if (_.isObject(options)) {
-      region = options.region;
-    }
-
-    // if there's no region specified we'll assume you meant the main region
-    region = region || DEFAULT_REGION;
-
-    // Add the region to the layout if it doesn't exist already and call the
-    // create() method on the new DynamicTemplate to create the UI.Component and
-    // return it. DynamicTemplate is not an instance of UI.Component.
-    return layout.region(region).create();
+  if (_.isString(options)) {
+    region = options;
+  } else if (_.isObject(options)) {
+    region = options.region;
   }
+
+  // if there's no region specified we'll assume you meant the main region
+  region = region || DEFAULT_REGION;
+
+  // Add the region to the layout if it doesn't exist already and call the
+  // create() method on the new DynamicTemplate to create the UI.Component and
+  // return it. DynamicTemplate is not an instance of UI.Component.
+  return layout.region(region).create();
 }));
 
 /**
@@ -274,40 +245,38 @@ UI.registerHelper('yield', UI.Component.extend({
  * Note: The helper is a UI.Component object instead of a function so that
  * Meteor UI does not create a Deps.Dependency.
  */
-UI.registerHelper('contentFor', UI.Component.extend({
-  render: function () {
-    var layout = findFirstLayout(this);
+UI.registerHelper('contentFor', Template.__create__('contentFor', function () {
+  var layout = findFirstLayout(this);
 
-    if (!layout)
-      throw new Error("No Iron.Layout found so you can't use contentFor!");
+  if (!layout)
+    throw new Error("No Iron.Layout found so you can't use contentFor!");
 
-    var options = this.get() || {}
-    var content = this.__content;
-    var template = options.template;
-    var data = options.data;
+  var options = DynamicTemplate.getInclusionArguments(this) || {}
+  var content = this.templateContentBlock;
+  var template = options.template;
+  var data = options.data;
 
-    if (_.isString(options))
-      region = options;
-    else if (_.isObject(options))
-      region = options.region;
-    else
-      throw new Error("Which region is this contentFor block supposed to be for?");
+  if (_.isString(options))
+    region = options;
+  else if (_.isObject(options))
+    region = options.region;
+  else
+    throw new Error("Which region is this contentFor block supposed to be for?");
 
-    // set the region to a provided template or the content directly.
-    layout.region(region).template(template || content);
+  // set the region to a provided template or the content directly.
+  layout.region(region).template(template || content);
 
-    // tell the layout to track this as a rendered region if we're in a
-    // rendering transaction.
-    layout._trackRenderedRegion(region);
+  // tell the layout to track this as a rendered region if we're in a
+  // rendering transaction.
+  layout._trackRenderedRegion(region);
 
-    // if we have some data then set the data context
-    if (data)
-      layout.region(region).data(data);
+  // if we have some data then set the data context
+  if (data)
+    layout.region(region).data(data);
 
-    // just render nothing into this area of the page since the dynamic template
-    // will do the actual rendering into the right region.
-    return null;
-  }
+  // just render nothing into this area of the page since the dynamic template
+  // will do the actual rendering into the right region.
+  return null;
 }));
 
 /**
@@ -322,19 +291,19 @@ UI.registerHelper('contentFor', UI.Component.extend({
  *    {{/contentFor}}
  *  {{/Layout}}
  */
-UI.registerHelper('Layout', UI.Component.extend({
-  render: function () {
-    var layout = new Layout({
-      template: this.lookup('template'),
-      data: this.lookup('data'),
-      content: this.__content
-    });
+UI.registerHelper('Layout', Template.__create__('layout', function () {
+  var args = Iron.DynamicTemplate.args(this);
 
-    return layout.create();
-  }
+  var layout = new Layout({
+    template: function () { return args('template'); },
+    data: function () { return args('data'); },
+    content: this.templateContentBlock
+  });
+
+  return layout.create();
 }));
 
-/**
- * Namespacing
- */
+/*****************************************************************************/
+/* Namespacing */
+/*****************************************************************************/
 Iron.Layout = Layout;
