@@ -113,6 +113,13 @@ Layout.prototype.has = function (region) {
 };
 
 /**
+ * Returns an array of region keys.
+ */
+Layout.prototype.regionKeys = function () {
+  return _.keys(this._regions);
+};
+
+/**
  * Clear a given region or the "main" region by default.
  */
 Layout.prototype.clear = function (region) {
@@ -160,10 +167,13 @@ Layout.prototype._trackRenderedRegion = function (region) {
  * Stop a rendering transaction and retrieve the rendered regions.
  */
 Layout.prototype.endRendering = function () {
+  // we flush here to ensure all of the {{#contentFor}} inclusions have had a
+  // chance to render from our templates, otherwise we'll never know about
+  // them. 
   Deps.flush();
   var renderedRegions = this._renderedRegions;
   this._renderedRegions = null;
-  return renderedRegions;
+  return _.keys(renderedRegions);
 };
 
 /**

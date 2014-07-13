@@ -119,7 +119,7 @@ Tinytest.add('Layout - JavaScript rendering transactions', function (test) {
     layout.render('LayoutOnePage');
     layout.render('Aside', {to: 'aside'});
 
-    var renderedRegions = Object.keys(layout.endRendering());
+    var renderedRegions = layout.endRendering();
     test.equal(renderedRegions, ['main', 'aside', 'footer']);
   });
 });
