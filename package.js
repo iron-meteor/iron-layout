@@ -32,8 +32,6 @@ Package.on_use(function (api) {
   api.add_files('blaze_layout_errors.js', ['client', 'server']);
   api.add_files('default_layout.html', 'client');
   api.add_files('layout.js', 'client');
-
-  api.export('Iron', 'client');
 });
 
 Package.on_test(function (api) {
