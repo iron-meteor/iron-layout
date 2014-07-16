@@ -17,28 +17,29 @@ Package.on_use(function (api) {
   // some utils
   api.use('underscore');
 
-  api.use('iron-core');
-  api.imply('iron-core');
+  api.use('iron:core');
+  api.imply('iron:core');
 
   // dynamic templates
-  api.use('iron-dynamic-template');
+  api.use('iron:dynamic-template');
 
   // if you use iron-layout you should get iron-dynamic-template for free!
-  api.imply('iron-dynamic-template');
+  api.imply('iron:dynamic-template');
 
   // if blaze-layout make sure it loads first so we can clean up after it.
   api.use('blaze-layout', {weak: true});
 
-  api.add_files('blaze_layout_errors.js', ['client', 'server']);
-  api.add_files('default_layout.html', 'client');
-  api.add_files('layout.js', 'client');
+  api.addFiles('blaze_layout_errors.js', ['client', 'server']);
+  api.addFiles('default_layout.html', 'client');
+  api.addFiles('layout.js', 'client');
 });
 
 Package.on_test(function (api) {
-  api.use('iron-layout');
+  api.use('iron:layout');
   api.use('tinytest');
   api.use('test-helpers');
   api.use('templating');
+  api.use('deps');
 
   api.add_files('layout_test.html', 'client');
   api.add_files('layout_test.js', 'client');
