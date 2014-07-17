@@ -3,7 +3,7 @@
   "description": "Dynamic layouts which enable rendering dynamic templates into regions on a page.",
   "homepage": "https://github.com/eventedmind/iron-layout",
   "author": "Chris Mather (https://github.com/cmather)",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "git": "https://github.com/EventedMind/iron-layout.git",
   "packages": {
     "iron-core": {},

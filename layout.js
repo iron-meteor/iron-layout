@@ -173,7 +173,7 @@ Layout.prototype.endRendering = function (opts) {
   opts = opts || {};
   if (opts.flush !== false)
     Deps.flush();
-  var renderedRegions = this._renderedRegions;
+  var renderedRegions = this._renderedRegions || {};
   this._renderedRegions = null;
   return _.keys(renderedRegions);
 };
