@@ -1,7 +1,7 @@
 Package.describe({
   name: 'iron-layout',
   summary: 'Dynamic layouts which enable rendering dynamic templates into regions on a page.',
-  version: '0.1.0',
+  version: '0.1.2',
   githubUrl: 'https://github.com/eventedmind/iron-layout'
 });
 
@@ -27,7 +27,7 @@ Package.on_use(function (api) {
   api.imply('iron:dynamic-template');
 
   // if blaze-layout make sure it loads first so we can clean up after it.
-  api.use('blaze-layout', {weak: true});
+  api.use('blaze-layout', 'client', {weak: true});
 
   api.addFiles('blaze_layout_errors.js', ['client', 'server']);
   api.addFiles('default_layout.html', 'client');
