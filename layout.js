@@ -166,11 +166,13 @@ Layout.prototype._trackRenderedRegion = function (region) {
 /**
  * Stop a rendering transaction and retrieve the rendered regions.
  */
-Layout.prototype.endRendering = function () {
+Layout.prototype.endRendering = function (opts) {
   // we flush here to ensure all of the {{#contentFor}} inclusions have had a
   // chance to render from our templates, otherwise we'll never know about
   // them. 
-  Deps.flush();
+  opts = opts || {};
+  if (opts.flush !== false)
+    Deps.flush();
   var renderedRegions = this._renderedRegions;
   this._renderedRegions = null;
   return _.keys(renderedRegions);
