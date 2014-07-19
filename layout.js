@@ -79,6 +79,31 @@ Layout.prototype.region = function (name, options) {
 };
 
 /**
+ * If we set a new template for the layout we should destroy all of the existing
+ * regions.
+ */
+Layout.prototype.template = function (value) {
+  if (arguments.length === 1 && value !== this._template) {
+    // if we're setting a new layout template, destroy the existing regions
+    // first.
+    this.destroyRegions();
+  }
+
+  return Layout.__super__.template.apply(this, arguments);
+};
+
+/**
+ * Destroy all child regions and reset the regions map.
+ */
+Layout.prototype.destroyRegions = function () {
+  _.each(this._regions, function (dynamicTemplate) {
+    dynamicTemplate.destroy();
+  });
+
+  this._regions = {};
+};
+
+/**
  * Set the template for a region.
  */
 Layout.prototype.render = function (template, options) {
