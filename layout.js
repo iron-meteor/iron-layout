@@ -212,7 +212,7 @@ Layout.prototype._createDynamicTemplate = function (name, options) {
   var self = this;
   var tmpl = new Iron.DynamicTemplate(options);
   var capitalize = Iron.utils.capitalize;
-  tmpl.region = name;
+  tmpl._region = name;
 
   _.each(['created', 'materialized', 'rendered', 'destroyed'], function (hook) {
     hook = capitalize(hook);
