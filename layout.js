@@ -148,7 +148,19 @@ Layout.prototype.clearAll = function () {
 /**
  * Start tracking rendered regions.
  */
-Layout.prototype.beginRendering = function () {
+Layout.prototype.beginRendering = function (onComplete) {
+  var self = this;
+  if (this._finishRenderingTransaction)
+    this._finishRenderingTransaction();
+  else {
+    this._finishRenderingTransaction = _.once(function () {
+      var regions = self.endRendering({flush: false});
+      onComplete && onComplete(regions);
+    });
+  }
+
+  Deps.afterFlush(this._finishRenderingTransaction);
+
   if (this._renderedRegions)
     throw new Error("You called beginRendering again before calling endRendering");
   this._renderedRegions = {};
