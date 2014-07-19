@@ -112,15 +112,67 @@ Tinytest.add('Layout - JavaScript rendering transactions', function (test) {
 
 
   withRenderedTemplate(layout.create(), function (el) {
-    // start the transaction
-    layout.beginRendering();
+    // start the transaction and provide an oncomplete callback
+    var calls = [];
+    layout.beginRendering(function onComplete(regions) {
+      calls.push({
+        regions: regions
+      });
+    });
     // render the LayoutOnePage template into the main region
     // this should also render "footer" through a contentFor block
     layout.render('LayoutOnePage');
     layout.render('Aside', {to: 'aside'});
 
-    var renderedRegions = layout.endRendering();
-    test.equal(renderedRegions, ['main', 'aside', 'footer']);
+    Deps.flush();
+    test.equal(calls.length, 1);
+    test.equal(calls[0].regions, ['main', 'aside', 'footer']);
+  });
+});
+
+Tinytest.add('Layout - rendering transactions multiple calls to beginRendering', function (test) {
+  var layout = new Iron.Layout({template: 'RenderingTransactionsLayout'});
+
+  withRenderedTemplate(layout.create(), function (el) {
+    // start the transaction and provide an oncomplete callback
+    var calls = [];
+
+    var onComplete = function onComplete (regions) {
+      calls.push({
+        regions: regions
+      });
+    };
+
+    layout.beginRendering(onComplete);
+
+    // render the LayoutOnePage template into the main region
+    // this should also render "footer" through a contentFor block
+    layout.render('LayoutOnePage');
+    layout.render('Aside', {to: 'aside'});
+
+    // now before we flush call beginRendering again. the previous transaction
+    // should immediately complete
+    layout.beginRendering(onComplete);
+
+    // this time our onComplete should only register the main region being
+    // rendered.
+    layout.render('LayoutOnePage');
+
+    // now actually flush
+    Deps.flush();
+    test.equal(calls.length, 2, "onComplete called for both rendering transactions");
+
+    // first time, the rendered regions only include the programmatic ones
+    // because the contentFor doesn't have a change to run.
+    var regions = calls[0].regions;
+    test.equal(regions.length, 2);
+    test.isTrue(_.contains(regions, "main"));
+    test.isTrue(_.contains(regions, "aside"));
+
+    var regions = calls[1].regions;
+    test.equal(regions.length, 2);
+    test.isTrue(_.contains(regions, "main"));
+    test.isTrue(_.contains(regions, "footer"));
   });
 });
 

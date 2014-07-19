@@ -177,12 +177,11 @@ Layout.prototype.beginRendering = function (onComplete) {
   var self = this;
   if (this._finishRenderingTransaction)
     this._finishRenderingTransaction();
-  else {
-    this._finishRenderingTransaction = _.once(function () {
-      var regions = self.endRendering({flush: false});
-      onComplete && onComplete(regions);
-    });
-  }
+
+  this._finishRenderingTransaction = _.once(function () {
+    var regions = self._endRendering({flush: false});
+    onComplete && onComplete(regions);
+  });
 
   Deps.afterFlush(this._finishRenderingTransaction);
 
@@ -201,9 +200,11 @@ Layout.prototype._trackRenderedRegion = function (region) {
 };
 
 /**
- * Stop a rendering transaction and retrieve the rendered regions.
+ * Stop a rendering transaction and retrieve the rendered regions. This
+ * shouldn't be called directly. Instead, pass an onComplete callback to the
+ * beginRendering method.
  */
-Layout.prototype.endRendering = function (opts) {
+Layout.prototype._endRendering = function (opts) {
   // we flush here to ensure all of the {{#contentFor}} inclusions have had a
   // chance to render from our templates, otherwise we'll never know about
   // them. 
