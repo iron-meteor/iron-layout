@@ -125,7 +125,7 @@ Layout.prototype.render = function (template, options) {
 
   // if we have data go ahead and set the data for the dynamic template,
   // otherwise, leave it be.
-  if (options.data)
+  if (typeof options.data !== 'undefined')
     dynamicTemplate.data(options.data);
 };
 
