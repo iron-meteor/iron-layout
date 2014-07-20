@@ -79,20 +79,6 @@ Layout.prototype.region = function (name, options) {
 };
 
 /**
- * If we set a new template for the layout we should destroy all of the existing
- * regions.
- */
-Layout.prototype.template = function (value) {
-  if (arguments.length === 1 && value !== this._template) {
-    // if we're setting a new layout template, destroy the existing regions
-    // first.
-    this.destroyRegions();
-  }
-
-  return Layout.__super__.template.apply(this, arguments);
-};
-
-/**
  * Destroy all child regions and reset the regions map.
  */
 Layout.prototype.destroyRegions = function () {
@@ -306,6 +292,7 @@ UI.registerHelper('yield', Template.__create__('yield', function () {
   // Example options: {{> yield region="footer"}} or {{> yield "footer"}}
   var options = DynamicTemplate.getInclusionArguments(this);
   var region;
+  var dynamicTemplate;
 
   if (_.isString(options)) {
     region = options;
@@ -316,10 +303,16 @@ UI.registerHelper('yield', Template.__create__('yield', function () {
   // if there's no region specified we'll assume you meant the main region
   region = region || DEFAULT_REGION;
 
-  // Add the region to the layout if it doesn't exist already and call the
-  // create() method on the new DynamicTemplate to create the UI.Component and
-  // return it. DynamicTemplate is not an instance of UI.Component.
-  return layout.region(region).create();
+  // get or create the region
+  dynamicTemplate = layout.region(region);
+
+  // if the dynamicTemplate had already been inserted, let's
+  // destroy it before creating a new one.
+  if (dynamicTemplate.isCreated)
+    dynamicTemplate.destroy();
+
+  // now return a newly created view
+  return dynamicTemplate.create();
 }));
 
 /**
