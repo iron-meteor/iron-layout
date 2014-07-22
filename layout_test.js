@@ -109,6 +109,19 @@ Tinytest.add('Layout - data - with in context trumps layout data', function (tes
   });
 });
 
+Tinytest.add('Layout - data - render always clears data', function (test) {
+  var layout = new Iron.Layout;
+  
+  withRenderedTemplate(layout.create(), function (el) {
+    layout.template('LayoutOne');
+    layout.render('One', {data: 'firstData'});
+    Deps.flush();
+    test.equal(el.innerHTML.compact(), 'layout-One-firstData-');
+
+    // rendering with no data, should now not have data
+    layout.render('One')
+    Deps.flush();
+    test.equal(el.innerHTML.compact(), 'layout-One--');
   });
 });
 

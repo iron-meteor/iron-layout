@@ -117,10 +117,9 @@ Layout.prototype.render = function (template, options) {
   // set the template value for the dynamic template
   dynamicTemplate.template(template);
 
-  // if we have data go ahead and set the data for the dynamic template,
-  // otherwise, leave it be.
-  if (typeof options.data !== 'undefined')
-    dynamicTemplate.data(options.data);
+  // set the data for the region. If options.data is not defined, this will 
+  // clear the data, which is what we want
+  dynamicTemplate.data(options.data);
 };
 
 /**
