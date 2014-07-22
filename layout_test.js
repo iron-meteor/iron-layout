@@ -91,7 +91,7 @@ Tinytest.add('Layout - data - yield inherits data layout if defined', function (
 Template.BlockLayoutWithOuterDataAndWith.data = null;
 Template.BlockLayoutWithOuterDataAndWith.helpers({
   getData: function () {
-    return Template.BlockLayoutNestedWiths.data;
+    return Template.BlockLayoutWithOuterDataAndWith.data;
   }
 });
 
