@@ -79,14 +79,6 @@ Layout.prototype.region = function (name, options) {
 };
 
 /**
- * Set all of the region data contexts to undefined to
- * reset them.
- */
-Layout.prototype.clearRegionData = function () {
-  _.each(this._regions, function (region) { region.data(undefined); });
-};
-
-/**
  * Destroy all child regions and reset the regions map.
  */
 Layout.prototype.destroyRegions = function () {
