@@ -17,14 +17,14 @@
 </template>
 
 <template name="BlockLayoutWithOuterData">
-  {{#with 'outer-data'}}
-    {{#Layout data=getData}}
+  {{#with 'outerData'}}
+    {{#Layout template="LayoutWithData" data=getData}}
       inner-{{this}}
     {{/Layout}}
   {{/with}}
 </template>
 
-<template name="BlockLayoutNestedWiths">
+<template name="BlockLayoutWithOuterDataAndWith">
   {{#with 'outerData'}}
     {{#Layout template="LayoutWithWith" data=getData}}
       inner-{{this}}-{{..}}
@@ -61,7 +61,7 @@
 <template name="LayoutWithWith">
   layout-{{this}}-
   {{#with 'innerData'}}
-    {{> yield data=getData}}
+    {{> yield}}
   {{/with}}
 </template>
 

@@ -74,67 +74,41 @@ Template.BlockLayoutWithOuterData.helpers({
   }
 });
 
-Template.LayoutWithWith.data = null;
-Template.LayoutWithWith.helpers({
-  getData: function () {
-    return Template.LayoutWithWith.data;
-  }
-});
-
-// Solution to this problem is probably something similar to https://github.com/EventedMind/blaze-layout/commit/96506ba163aa26ef2d00ec6cb2303df19230045d
 Tinytest.add('Layout - data - yield inherits data from outside by default', function (test) {
-  Template.BlockLayoutWithOuterData.data = null;
-  Template.LayoutWithWith.data = null;
+  Template.BlockLayoutWithOuterData.data = undefined;
   withRenderedTemplate('BlockLayoutWithOuterData', function (el) {
-    test.equal(el.innerHTML.compact(), 'inner-outerData');
+    test.equal(el.innerHTML.compact(), 'layout-outerData-inner-outerData');
   });
 });
 
-Tinytest.add('Layout - data - setting yield data overrides yield default', function (test) {
+Tinytest.add('Layout - data - yield inherits data layout if defined', function (test) {
   Template.BlockLayoutWithOuterData.data = 'layoutData';
-  Template.LayoutWithWith.data = 'yieldData';
   withRenderedTemplate('BlockLayoutWithOuterData', function (el) {
-    test.equal(el.innerHTML.compact(), 'inner-yieldData');
+    test.equal(el.innerHTML.compact(), 'layout-layoutData-inner-layoutData');
   });
 });
 
-Tinytest.add('Layout - data - setting layout data overrides yield default', function (test) {
-  Template.BlockLayoutWithOuterData.data = 'layoutData';
-  Template.LayoutWithWith.data = null;
-  withRenderedTemplate('BlockLayoutWithOuterData', function (el) {
-    test.equal(el.innerHTML.compact(), 'inner-layoutData');
-  });
-});
-
-Template.BlockLayoutNestedWiths.data = null;
-Template.BlockLayoutNestedWiths.helpers({
+Template.BlockLayoutWithOuterDataAndWith.data = null;
+Template.BlockLayoutWithOuterDataAndWith.helpers({
   getData: function () {
     return Template.BlockLayoutNestedWiths.data;
   }
 });
 
-// This one is more complex but should probably be made to work
 Tinytest.add('Layout - data - with in context trumps all else', function (test) {
-  Template.BlockLayoutNestedWiths.data = null;
-  Template.LayoutWithWith.data = null;
-  withRenderedTemplate('BlockLayoutNestedWiths', function (el) {
+  Template.BlockLayoutWithOuterDataAndWith.data = undefined;
+  withRenderedTemplate('BlockLayoutWithOuterDataAndWith', function (el) {
     test.equal(el.innerHTML.compact(), 'layout-outerData-inner-innerData-outerData');
   });
 });
 
 Tinytest.add('Layout - data - with in context trumps layout data', function (test) {
-  Template.BlockLayoutNestedWiths.data = 'layoutData';
-  Template.LayoutWithWith.data = null;
-  withRenderedTemplate('BlockLayoutNestedWiths', function (el) {
+  Template.BlockLayoutWithOuterDataAndWith.data = 'layoutData';
+  withRenderedTemplate('BlockLayoutWithOuterDataAndWith', function (el) {
     test.equal(el.innerHTML.compact(), 'layout-layoutData-inner-innerData-layoutData');
   });
 });
 
-Tinytest.add('Layout - data - yield data trumps with in context', function (test) {
-  Template.BlockLayoutNestedWiths.data = 'layoutData';
-  Template.LayoutWithWith.data = 'yieldData';
-  withRenderedTemplate('BlockLayoutNestedWiths', function (el) {
-    test.equal(el.innerHTML.compact(), 'layout-layoutData-inner-yieldData-innerData');
   });
 });
 
