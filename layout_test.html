@@ -16,6 +16,22 @@
   {{/Layout}}
 </template>
 
+<template name="BlockLayoutWithOuterData">
+  {{#with 'outer-data'}}
+    {{#Layout data=getData}}
+      inner-{{this}}
+    {{/Layout}}
+  {{/with}}
+</template>
+
+<template name="BlockLayoutNestedWiths">
+  {{#with 'outerData'}}
+    {{#Layout template="LayoutWithWith" data=getData}}
+      inner-{{this}}-{{..}}
+    {{/Layout}}
+  {{/with}}
+</template>
+
 <template name="LayoutOne">
   layout-
   {{> yield}}
@@ -40,6 +56,13 @@
   layout-{{this}}-
   {{> yield}}
   {{> yield "footer"}}
+</template>
+
+<template name="LayoutWithWith">
+  layout-{{this}}-
+  {{#with 'innerData'}}
+    {{> yield data=getData}}
+  {{/with}}
 </template>
 
 <template name="One">
