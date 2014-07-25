@@ -1,8 +1,7 @@
 Package.describe({
-  name: 'iron-layout',
   summary: 'Dynamic layouts which enable rendering dynamic templates into regions on a page.',
-  version: '0.1.2',
-  githubUrl: 'https://github.com/eventedmind/iron-layout'
+  version: '0.2.0',
+  git: 'https://github.com/eventedmind/iron-layout'
 });
 
 Package.on_use(function (api) {
@@ -39,6 +38,7 @@ Package.on_test(function (api) {
   api.use('tinytest');
   api.use('test-helpers');
   api.use('templating');
+  api.use('deps');
 
   api.add_files('layout_test.html', 'client');
   api.add_files('layout_test.js', 'client');

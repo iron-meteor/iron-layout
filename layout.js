@@ -79,6 +79,17 @@ Layout.prototype.region = function (name, options) {
 };
 
 /**
+ * Destroy all child regions and reset the regions map.
+ */
+Layout.prototype.destroyRegions = function () {
+  _.each(this._regions, function (dynamicTemplate) {
+    dynamicTemplate.destroy();
+  });
+
+  this._regions = {};
+};
+
+/**
  * Set the template for a region.
  */
 Layout.prototype.render = function (template, options) {
@@ -98,10 +109,9 @@ Layout.prototype.render = function (template, options) {
   // set the template value for the dynamic template
   dynamicTemplate.template(template);
 
-  // if we have data go ahead and set the data for the dynamic template,
-  // otherwise, leave it be.
-  if (options.data)
-    dynamicTemplate.data(options.data);
+  // set the data for the region. If options.data is not defined, this will 
+  // clear the data, which is what we want
+  dynamicTemplate.data(options.data);
 };
 
 /**
@@ -148,7 +158,18 @@ Layout.prototype.clearAll = function () {
 /**
  * Start tracking rendered regions.
  */
-Layout.prototype.beginRendering = function () {
+Layout.prototype.beginRendering = function (onComplete) {
+  var self = this;
+  if (this._finishRenderingTransaction)
+    this._finishRenderingTransaction();
+
+  this._finishRenderingTransaction = _.once(function () {
+    var regions = self._endRendering({flush: false});
+    onComplete && onComplete(regions);
+  });
+
+  Deps.afterFlush(this._finishRenderingTransaction);
+
   if (this._renderedRegions)
     throw new Error("You called beginRendering again before calling endRendering");
   this._renderedRegions = {};
@@ -164,9 +185,11 @@ Layout.prototype._trackRenderedRegion = function (region) {
 };
 
 /**
- * Stop a rendering transaction and retrieve the rendered regions.
+ * Stop a rendering transaction and retrieve the rendered regions. This
+ * shouldn't be called directly. Instead, pass an onComplete callback to the
+ * beginRendering method.
  */
-Layout.prototype.endRendering = function (opts) {
+Layout.prototype._endRendering = function (opts) {
   // we flush here to ensure all of the {{#contentFor}} inclusions have had a
   // chance to render from our templates, otherwise we'll never know about
   // them. 
@@ -212,7 +235,7 @@ Layout.prototype._createDynamicTemplate = function (name, options) {
   var self = this;
   var tmpl = new Iron.DynamicTemplate(options);
   var capitalize = Iron.utils.capitalize;
-  tmpl.region = name;
+  tmpl._region = name;
 
   _.each(['created', 'materialized', 'rendered', 'destroyed'], function (hook) {
     hook = capitalize(hook);
@@ -268,6 +291,7 @@ UI.registerHelper('yield', Template.__create__('yield', function () {
   // Example options: {{> yield region="footer"}} or {{> yield "footer"}}
   var options = DynamicTemplate.getInclusionArguments(this);
   var region;
+  var dynamicTemplate;
 
   if (_.isString(options)) {
     region = options;
@@ -278,10 +302,16 @@ UI.registerHelper('yield', Template.__create__('yield', function () {
   // if there's no region specified we'll assume you meant the main region
   region = region || DEFAULT_REGION;
 
-  // Add the region to the layout if it doesn't exist already and call the
-  // create() method on the new DynamicTemplate to create the UI.Component and
-  // return it. DynamicTemplate is not an instance of UI.Component.
-  return layout.region(region).create();
+  // get or create the region
+  dynamicTemplate = layout.region(region);
+
+  // if the dynamicTemplate had already been inserted, let's
+  // destroy it before creating a new one.
+  if (dynamicTemplate.isCreated)
+    dynamicTemplate.destroy();
+
+  // now return a newly created view
+  return dynamicTemplate.create();
 }));
 
 /**

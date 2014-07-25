@@ -74,67 +74,54 @@ Template.BlockLayoutWithOuterData.helpers({
   }
 });
 
-Template.LayoutWithWith.data = null;
-Template.LayoutWithWith.helpers({
-  getData: function () {
-    return Template.LayoutWithWith.data;
-  }
-});
-
-// Solution to this problem is probably something similar to https://github.com/EventedMind/blaze-layout/commit/96506ba163aa26ef2d00ec6cb2303df19230045d
 Tinytest.add('Layout - data - yield inherits data from outside by default', function (test) {
-  Template.BlockLayoutWithOuterData.data = null;
-  Template.LayoutWithWith.data = null;
+  Template.BlockLayoutWithOuterData.data = undefined;
   withRenderedTemplate('BlockLayoutWithOuterData', function (el) {
-    test.equal(el.innerHTML.compact(), 'inner-outerData');
+    test.equal(el.innerHTML.compact(), 'layout-outerData-inner-outerData');
   });
 });
 
-Tinytest.add('Layout - data - setting yield data overrides yield default', function (test) {
+Tinytest.add('Layout - data - yield inherits data layout if defined', function (test) {
   Template.BlockLayoutWithOuterData.data = 'layoutData';
-  Template.LayoutWithWith.data = 'yieldData';
   withRenderedTemplate('BlockLayoutWithOuterData', function (el) {
-    test.equal(el.innerHTML.compact(), 'inner-yieldData');
+    test.equal(el.innerHTML.compact(), 'layout-layoutData-inner-layoutData');
   });
 });
 
-Tinytest.add('Layout - data - setting layout data overrides yield default', function (test) {
-  Template.BlockLayoutWithOuterData.data = 'layoutData';
-  Template.LayoutWithWith.data = null;
-  withRenderedTemplate('BlockLayoutWithOuterData', function (el) {
-    test.equal(el.innerHTML.compact(), 'inner-layoutData');
-  });
-});
-
-Template.BlockLayoutNestedWiths.data = null;
-Template.BlockLayoutNestedWiths.helpers({
+Template.BlockLayoutWithOuterDataAndWith.data = null;
+Template.BlockLayoutWithOuterDataAndWith.helpers({
   getData: function () {
-    return Template.BlockLayoutNestedWiths.data;
+    return Template.BlockLayoutWithOuterDataAndWith.data;
   }
 });
 
-// This one is more complex but should probably be made to work
 Tinytest.add('Layout - data - with in context trumps all else', function (test) {
-  Template.BlockLayoutNestedWiths.data = null;
-  Template.LayoutWithWith.data = null;
-  withRenderedTemplate('BlockLayoutNestedWiths', function (el) {
-    test.equal(el.innerHTML.compact(), 'layout-outerData-inner-innerData-outerData');
+  Template.BlockLayoutWithOuterDataAndWith.data = undefined;
+  withRenderedTemplate('BlockLayoutWithOuterDataAndWith', function (el) {
+    test.equal(el.innerHTML.compact(), 'layout-outerData-inner-innerData');
   });
 });
 
 Tinytest.add('Layout - data - with in context trumps layout data', function (test) {
-  Template.BlockLayoutNestedWiths.data = 'layoutData';
-  Template.LayoutWithWith.data = null;
-  withRenderedTemplate('BlockLayoutNestedWiths', function (el) {
-    test.equal(el.innerHTML.compact(), 'layout-layoutData-inner-innerData-layoutData');
+  Template.BlockLayoutWithOuterDataAndWith.data = 'layoutData';
+  withRenderedTemplate('BlockLayoutWithOuterDataAndWith', function (el) {
+    test.equal(el.innerHTML.compact(), 'layout-layoutData-inner-innerData');
   });
 });
 
-Tinytest.add('Layout - data - yield data trumps with in context', function (test) {
-  Template.BlockLayoutNestedWiths.data = 'layoutData';
-  Template.LayoutWithWith.data = 'yieldData';
-  withRenderedTemplate('BlockLayoutNestedWiths', function (el) {
-    test.equal(el.innerHTML.compact(), 'layout-layoutData-inner-yieldData-innerData');
+Tinytest.add('Layout - data - render always clears data', function (test) {
+  var layout = new Iron.Layout;
+  
+  withRenderedTemplate(layout.create(), function (el) {
+    layout.template('LayoutOne');
+    layout.render('One', {data: 'firstData'});
+    Deps.flush();
+    test.equal(el.innerHTML.compact(), 'layout-One-firstData-');
+
+    // rendering with no data, should now not have data
+    layout.render('One')
+    Deps.flush();
+    test.equal(el.innerHTML.compact(), 'layout-One--');
   });
 });
 
@@ -183,15 +170,67 @@ Tinytest.add('Layout - JavaScript rendering transactions', function (test) {
 
 
   withRenderedTemplate(layout.create(), function (el) {
-    // start the transaction
-    layout.beginRendering();
+    // start the transaction and provide an oncomplete callback
+    var calls = [];
+    layout.beginRendering(function onComplete(regions) {
+      calls.push({
+        regions: regions
+      });
+    });
     // render the LayoutOnePage template into the main region
     // this should also render "footer" through a contentFor block
     layout.render('LayoutOnePage');
     layout.render('Aside', {to: 'aside'});
 
-    var renderedRegions = layout.endRendering();
-    test.equal(renderedRegions, ['main', 'aside', 'footer']);
+    Deps.flush();
+    test.equal(calls.length, 1);
+    test.equal(calls[0].regions, ['main', 'aside', 'footer']);
+  });
+});
+
+Tinytest.add('Layout - rendering transactions multiple calls to beginRendering', function (test) {
+  var layout = new Iron.Layout({template: 'RenderingTransactionsLayout'});
+
+  withRenderedTemplate(layout.create(), function (el) {
+    // start the transaction and provide an oncomplete callback
+    var calls = [];
+
+    var onComplete = function onComplete (regions) {
+      calls.push({
+        regions: regions
+      });
+    };
+
+    layout.beginRendering(onComplete);
+
+    // render the LayoutOnePage template into the main region
+    // this should also render "footer" through a contentFor block
+    layout.render('LayoutOnePage');
+    layout.render('Aside', {to: 'aside'});
+
+    // now before we flush call beginRendering again. the previous transaction
+    // should immediately complete
+    layout.beginRendering(onComplete);
+
+    // this time our onComplete should only register the main region being
+    // rendered.
+    layout.render('LayoutOnePage');
+
+    // now actually flush
+    Deps.flush();
+    test.equal(calls.length, 2, "onComplete called for both rendering transactions");
+
+    // first time, the rendered regions only include the programmatic ones
+    // because the contentFor doesn't have a change to run.
+    var regions = calls[0].regions;
+    test.equal(regions.length, 2);
+    test.isTrue(_.contains(regions, "main"));
+    test.isTrue(_.contains(regions, "aside"));
+
+    var regions = calls[1].regions;
+    test.equal(regions.length, 2);
+    test.isTrue(_.contains(regions, "main"));
+    test.isTrue(_.contains(regions, "footer"));
   });
 });
 
