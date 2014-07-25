@@ -7,9 +7,6 @@ be used independently for composing templates. For example, your app might
 have a standard dialog box layout and you want to populate content dynamically
 into the dialog box depending upon what kind of dialog it is.
 
-## Install
-*Note: Not on atmosphere yet. For now, just use a Github clone.*
-
 ## Reusing Templates with a Layout
 
 ```html
