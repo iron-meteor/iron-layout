@@ -98,14 +98,14 @@ Template.BlockLayoutWithOuterDataAndWith.helpers({
 Tinytest.add('Layout - data - with in context trumps all else', function (test) {
   Template.BlockLayoutWithOuterDataAndWith.data = undefined;
   withRenderedTemplate('BlockLayoutWithOuterDataAndWith', function (el) {
-    test.equal(el.innerHTML.compact(), 'layout-outerData-inner-innerData-outerData');
+    test.equal(el.innerHTML.compact(), 'layout-outerData-inner-innerData');
   });
 });
 
 Tinytest.add('Layout - data - with in context trumps layout data', function (test) {
   Template.BlockLayoutWithOuterDataAndWith.data = 'layoutData';
   withRenderedTemplate('BlockLayoutWithOuterDataAndWith', function (el) {
-    test.equal(el.innerHTML.compact(), 'layout-layoutData-inner-innerData-layoutData');
+    test.equal(el.innerHTML.compact(), 'layout-layoutData-inner-innerData');
   });
 });
 
