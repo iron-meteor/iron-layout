@@ -28,9 +28,9 @@ Package.on_use(function (api) {
   // if blaze-layout make sure it loads first so we can clean up after it.
   api.use('blaze-layout', 'client', {weak: true});
 
-  api.add_files('blaze_layout_errors.js', ['client', 'server']);
-  api.add_files('default_layout.html', 'client');
-  api.add_files('layout.js', 'client');
+  api.add_files('blaze_layout_errors.js');
+  api.add_files('default_layout.html');
+  api.add_files('layout.js');
 });
 
 Package.on_test(function (api) {

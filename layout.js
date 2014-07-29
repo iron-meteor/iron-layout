@@ -2,6 +2,7 @@
 /* Imports */
 /*****************************************************************************/
 var DynamicTemplate = Iron.DynamicTemplate;
+var inherits = Iron.utils.inherits;
 
 /*****************************************************************************/
 /* Helpers */
@@ -58,7 +59,7 @@ DEFAULT_REGION = Layout.DEFAULT_REGION = 'main';
  * Inherits from Iron.DynamicTemplate which gives us the ability to set the
  * template and data context dynamically.
  */
-Meteor._inherits(Layout, Iron.DynamicTemplate);
+inherits(Layout, Iron.DynamicTemplate);
 
 /**
  * Return the DynamicTemplate instance for a given region. If the region doesn't
@@ -265,129 +266,129 @@ Layout.prototype._runRegionHooks = function (name, regionView, regionDynamicTemp
 /*****************************************************************************/
 /* UI Helpers */
 /*****************************************************************************/
+if (typeof Template !== 'undefined') {
+  /**
+   * Create a region in the closest layout ancestor.
+   *
+   * Examples:
+   *    <aside>
+   *      {{> yield "aside"}}
+   *    </aside>
+   *
+   *    <article>
+   *      {{> yield}}
+   *    </article>
+   *
+   *    <footer>
+   *      {{> yield "footer"}}
+   *    </footer>
+   */
+  UI.registerHelper('yield', Template.__create__('yield', function () {
+    var layout = findFirstLayout(this);
 
-/**
- * Create a region in the closest layout ancestor.
- *
- * Examples:
- *    <aside>
- *      {{> yield "aside"}}
- *    </aside>
- *
- *    <article>
- *      {{> yield}}
- *    </article>
- *
- *    <footer>
- *      {{> yield "footer"}}
- *    </footer>
- */
-UI.registerHelper('yield', Template.__create__('yield', function () {
-  var layout = findFirstLayout(this);
+    if (!layout)
+      throw new Error("No Iron.Layout found so you can't use yield!");
 
-  if (!layout)
-    throw new Error("No Iron.Layout found so you can't use yield!");
+    // Example options: {{> yield region="footer"}} or {{> yield "footer"}}
+    var options = DynamicTemplate.getInclusionArguments(this);
+    var region;
+    var dynamicTemplate;
 
-  // Example options: {{> yield region="footer"}} or {{> yield "footer"}}
-  var options = DynamicTemplate.getInclusionArguments(this);
-  var region;
-  var dynamicTemplate;
+    if (_.isString(options)) {
+      region = options;
+    } else if (_.isObject(options)) {
+      region = options.region;
+    }
 
-  if (_.isString(options)) {
-    region = options;
-  } else if (_.isObject(options)) {
-    region = options.region;
-  }
+    // if there's no region specified we'll assume you meant the main region
+    region = region || DEFAULT_REGION;
 
-  // if there's no region specified we'll assume you meant the main region
-  region = region || DEFAULT_REGION;
+    // get or create the region
+    dynamicTemplate = layout.region(region);
 
-  // get or create the region
-  dynamicTemplate = layout.region(region);
+    // if the dynamicTemplate had already been inserted, let's
+    // destroy it before creating a new one.
+    if (dynamicTemplate.isCreated)
+      dynamicTemplate.destroy();
 
-  // if the dynamicTemplate had already been inserted, let's
-  // destroy it before creating a new one.
-  if (dynamicTemplate.isCreated)
-    dynamicTemplate.destroy();
+    // now return a newly created view
+    return dynamicTemplate.create();
+  }));
 
-  // now return a newly created view
-  return dynamicTemplate.create();
-}));
+  /**
+   * Render a template into a region in the closest layout ancestor from within
+   * your template markup.
+   *
+   * Examples:
+   *
+   *  {{#contentFor "footer"}}
+   *    Footer stuff
+   *  {{/contentFor}}
+   *
+   *  {{> contentFor region="footer" template="SomeTemplate" data=someData}}
+   *
+   * Note: The helper is a UI.Component object instead of a function so that
+   * Meteor UI does not create a Deps.Dependency.
+   */
+  UI.registerHelper('contentFor', Template.__create__('contentFor', function () {
+    var layout = findFirstLayout(this);
 
-/**
- * Render a template into a region in the closest layout ancestor from within
- * your template markup.
- *
- * Examples:
- *
- *  {{#contentFor "footer"}}
- *    Footer stuff
- *  {{/contentFor}}
- *
- *  {{> contentFor region="footer" template="SomeTemplate" data=someData}}
- *
- * Note: The helper is a UI.Component object instead of a function so that
- * Meteor UI does not create a Deps.Dependency.
- */
-UI.registerHelper('contentFor', Template.__create__('contentFor', function () {
-  var layout = findFirstLayout(this);
+    if (!layout)
+      throw new Error("No Iron.Layout found so you can't use contentFor!");
 
-  if (!layout)
-    throw new Error("No Iron.Layout found so you can't use contentFor!");
+    var options = DynamicTemplate.getInclusionArguments(this) || {}
+    var content = this.templateContentBlock;
+    var template = options.template;
+    var data = options.data;
+    var region;
 
-  var options = DynamicTemplate.getInclusionArguments(this) || {}
-  var content = this.templateContentBlock;
-  var template = options.template;
-  var data = options.data;
-  var region;
+    if (_.isString(options))
+      region = options;
+    else if (_.isObject(options))
+      region = options.region;
+    else
+      throw new Error("Which region is this contentFor block supposed to be for?");
 
-  if (_.isString(options))
-    region = options;
-  else if (_.isObject(options))
-    region = options.region;
-  else
-    throw new Error("Which region is this contentFor block supposed to be for?");
+    // set the region to a provided template or the content directly.
+    layout.region(region).template(template || content);
 
-  // set the region to a provided template or the content directly.
-  layout.region(region).template(template || content);
+    // tell the layout to track this as a rendered region if we're in a
+    // rendering transaction.
+    layout._trackRenderedRegion(region);
 
-  // tell the layout to track this as a rendered region if we're in a
-  // rendering transaction.
-  layout._trackRenderedRegion(region);
+    // if we have some data then set the data context
+    if (data)
+      layout.region(region).data(data);
 
-  // if we have some data then set the data context
-  if (data)
-    layout.region(region).data(data);
+    // just render nothing into this area of the page since the dynamic template
+    // will do the actual rendering into the right region.
+    return null;
+  }));
 
-  // just render nothing into this area of the page since the dynamic template
-  // will do the actual rendering into the right region.
-  return null;
-}));
+  /**
+   * Let people use Layout directly from their templates!
+   *
+   * Example:
+   *  {{#Layout template="MyTemplate"}}
+   *    Main content goes here
+   *
+   *    {{#contentFor "footer"}}
+   *      footer goes here
+   *    {{/contentFor}}
+   *  {{/Layout}}
+   */
+  UI.registerHelper('Layout', Template.__create__('layout', function () {
+    var args = Iron.DynamicTemplate.args(this);
 
-/**
- * Let people use Layout directly from their templates!
- *
- * Example:
- *  {{#Layout template="MyTemplate"}}
- *    Main content goes here
- *
- *    {{#contentFor "footer"}}
- *      footer goes here
- *    {{/contentFor}}
- *  {{/Layout}}
- */
-UI.registerHelper('Layout', Template.__create__('layout', function () {
-  var args = Iron.DynamicTemplate.args(this);
+    var layout = new Layout({
+      template: function () { return args('template'); },
+      data: function () { return args('data'); },
+      content: this.templateContentBlock
+    });
 
-  var layout = new Layout({
-    template: function () { return args('template'); },
-    data: function () { return args('data'); },
-    content: this.templateContentBlock
-  });
-
-  return layout.create();
-}));
-
+    return layout.create();
+  }));
+}
 /*****************************************************************************/
 /* Namespacing */
 /*****************************************************************************/
