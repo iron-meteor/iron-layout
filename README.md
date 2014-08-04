@@ -19,9 +19,11 @@ into the dialog box depending upon what kind of dialog it is.
     {{> yield}}
   </div>
   
-  <div id="footer">
-    {{> yield "footer"}}
-  </div>
+  {{#if hasRegion 'footer'}}
+    <div id="footer">
+      {{> yield "footer"}}
+    </div>
+  {{/if}}
 </template>
 
 <template name="SomeDialog">
