@@ -2,7 +2,7 @@
   "dependencies": [
     [
       "blaze",
-      "1.0.1"
+      "1.0.0"
     ],
     [
       "deps",
@@ -46,11 +46,11 @@
     ],
     [
       "minimongo",
-      "1.0.1"
+      "1.0.0"
     ],
     [
       "observe-sequence",
-      "1.0.1"
+      "1.0.0"
     ],
     [
       "ordered-dict",
