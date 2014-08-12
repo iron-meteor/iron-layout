@@ -1,34 +1,35 @@
 Package.describe({
   summary: 'Dynamic layouts which enable rendering dynamic templates into regions on a page.',
-  version: '0.2.0',
+  version: '0.3.0',
   git: 'https://github.com/eventedmind/iron-layout'
 });
 
 Package.on_use(function (api) {
   // so our default_layout gets compiled
-  api.use('templating');
+  api.use('templating@1.0.0');
 
-  api.use('ui');
+  api.use('ui@1.0.0');
 
   // for utils like Meteor._inherits
-  api.use('meteor');
+  api.use('meteor@1.0.0');
 
   // some utils
-  api.use('underscore');
+  api.use('underscore@1.0.0');
 
-  api.use('iron-core');
-  api.imply('iron-core');
+  api.use('iron:core@0.3.2');
+  api.imply('iron:core');
 
   // dynamic templates
-  api.use('iron-dynamic-template');
+  api.use('iron:dynamic-template@0.3.0');
 
   // if you use iron-layout you should get iron-dynamic-template for free!
-  api.imply('iron-dynamic-template');
+  api.imply('iron:dynamic-template');
 
-  // if blaze-layout make sure it loads first so we can clean up after it.
-  api.use('blaze-layout', 'client', {weak: true});
+  api.use('cmather:blaze-layout', {weak: true});
+  api.use('cmather:iron-layout', {weak: true});
 
-  api.add_files('blaze_layout_errors.js');
+  api.add_files('version_conflict_errors.js');
+
   api.add_files('default_layout.html');
   api.add_files('layout.js');
 });
