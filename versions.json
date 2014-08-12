@@ -2,7 +2,7 @@
   "dependencies": [
     [
       "blaze",
-      "1.0.0"
+      "1.0.1"
     ],
     [
       "deps",
@@ -26,11 +26,11 @@
     ],
     [
       "iron:core",
-      "0.1.0"
+      "0.3.2"
     ],
     [
       "iron:dynamic-template",
-      "0.1.0"
+      "0.3.0"
     ],
     [
       "jquery",
@@ -42,15 +42,15 @@
     ],
     [
       "meteor",
-      "1.0.0"
+      "1.0.2"
     ],
     [
       "minimongo",
-      "1.0.0"
+      "1.0.1"
     ],
     [
       "observe-sequence",
-      "1.0.0"
+      "1.0.1"
     ],
     [
       "ordered-dict",
@@ -61,12 +61,8 @@
       "1.0.0"
     ],
     [
-      "spacebars",
-      "1.0.0"
-    ],
-    [
       "templating",
-      "1.0.0"
+      "1.0.2"
     ],
     [
       "ui",
@@ -78,6 +74,6 @@
     ]
   ],
   "pluginDependencies": [],
-  "toolVersion": "meteor-tool@1.0.0",
+  "toolVersion": "meteor-tool@1.0.8",
   "format": "1.0"
 }
