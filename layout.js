@@ -366,6 +366,28 @@ if (typeof Template !== 'undefined') {
   }));
 
   /**
+   * Check to see if a given region is currently rendered to.
+   *
+   * Example:
+   *    {{#if hasRegion 'aside'}}
+   *      <aside>
+   *        {{> yield "aside"}}
+   *      </aside>
+   *    {{/if}}
+   */
+  UI.registerHelper('hasRegion', function (region) {
+    var layout = findFirstLayout(Blaze.getCurrentView());
+
+    if (!layout)
+      throw new Error("No Iron.Layout found so you can't use hasRegion!");
+    
+    if (!_.isString(region))
+      throw new Error("You need to provide an region argument to hasRegion");
+    
+    return !! layout.region(region).template();
+  });
+
+  /**
    * Let people use Layout directly from their templates!
    *
    * Example:

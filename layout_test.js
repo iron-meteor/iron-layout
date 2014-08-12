@@ -316,3 +316,17 @@ Tinytest.add('Layout - default layout', function (test) {
     test.equal(el.innerHTML.compact(), 'plain', 'no default layout');
   });
 });
+
+Tinytest.add('Layout - hasRegion', function (test) {
+  var layout = new Iron.Layout;
+
+  withRenderedTemplate(layout.create(), function (el) {
+    layout.template('LayoutWithHasRegion');
+    Deps.flush();
+    test.equal(el.innerHTML.compact(), 'no', 'hasRegion mis-reported true');
+    
+    layout.render('One', {to: 'test'});
+    Deps.flush();
+    test.equal(el.innerHTML.compact(), 'yes', 'hasRegion mis-reported false');
+  });
+});
