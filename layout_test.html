@@ -65,8 +65,20 @@
   {{/with}}
 </template>
 
+<template name="LayoutWithHasRegion">
+  {{#if hasRegion 'test'}}
+    yes
+  {{else}}
+    no
+  {{/if}}
+</template>
+
 <template name="One">
   One-{{this}}-
+</template>
+
+<template name="OneFoo">
+  One-{{foo}}-
 </template>
 
 <template name="Two">
