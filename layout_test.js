@@ -125,6 +125,29 @@ Tinytest.add('Layout - data - render always clears data', function (test) {
   });
 });
 
+// see https://github.com/EventedMind/iron-router/issues/693
+Tinytest.add('Layout - data - in-place changes to data are not missed', function(test) {
+  var layout = new Iron.Layout;
+  var Posts = new Meteor.Collection(null);
+  Posts.insert({foo: 'bar'});
+  
+  withRenderedTemplate(layout.create(), function (el) {
+    layout.template('LayoutOne');
+    layout.data(function() {
+      return Posts.findOne();
+    });
+    layout.render('OneFoo');
+    Deps.flush();
+    test.equal(el.innerHTML.compact(), 'layout-One-bar-');
+    
+    var post = layout.data(); // grab the internal reference, if exists
+    post.foo = 'baz';
+    Posts.update(post._id, {$set: {foo: post.foo}});
+    Deps.flush();
+    test.equal(el.innerHTML.compact(), 'layout-One-baz-');
+  });
+});
+
 
 Tinytest.add('Layout - JavaScript layout', function (test) {
   var layout = new Iron.Layout;
