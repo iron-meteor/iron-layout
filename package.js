@@ -35,7 +35,7 @@ Package.on_use(function (api) {
 });
 
 Package.on_test(function (api) {
-  api.use('iron-layout');
+  api.use('iron:layout');
   api.use('tinytest');
   api.use('test-helpers');
   api.use('templating');

@@ -1,4 +1,11 @@
 
+v0.3.0 / 2014-08-12
+==================
+  * pull in hasRegion helper
+  * update package for new packaging system with errors for cmather name
+  * Added test for in-place data changes.
+  * make it work on the server too
+
 v0.2.0 / 2014-07-25
 ==================
 
