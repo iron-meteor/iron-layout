@@ -25,8 +25,8 @@ Package.on_use(function (api) {
   // if you use iron-layout you should get iron-dynamic-template for free!
   api.imply('iron:dynamic-template');
 
-  api.use('cmather:blaze-layout', {weak: true});
-  api.use('cmather:iron-layout', {weak: true});
+  api.use('cmather:blaze-layout@0.2.5', {weak: true});
+  api.use('cmather:iron-layout@0.2.0', {weak: true});
 
   api.add_files('version_conflict_errors.js');
 
