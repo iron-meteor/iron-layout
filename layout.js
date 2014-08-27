@@ -12,7 +12,7 @@ var inherits = Iron.utils.inherits;
  */
 findFirstLayout = function (view) {
   while (view) {
-    if (view.kind === 'Iron.Layout')
+    if (view.name === 'Iron.Layout')
       return view.__dynamicTemplate__;
     else
       view = view.parentView;
@@ -39,7 +39,7 @@ Layout = function (options) {
   Layout.__super__.constructor.apply(this, arguments);
 
   options = options || {};
-  this.kind = 'Iron.Layout';
+  this.name = 'Iron.Layout';
   this._regions = {};
   this._regionHooks = {};
   this.defaultTemplate('__IronDefaultLayout__');
@@ -208,10 +208,9 @@ Layout.prototype._endRendering = function (opts) {
 _.each(
   [
     'onRegionCreated',
-    'onRegionMaterialized',
     'onRegionRendered',
     'onRegionDestroyed'
-  ], 
+  ],
   function (hook) {
     Layout.prototype[hook] = function (cb) {
       var hooks = this._regionHooks[hook] = this._regionHooks[hook] || [];
@@ -238,12 +237,17 @@ Layout.prototype._createDynamicTemplate = function (name, options) {
   var capitalize = Iron.utils.capitalize;
   tmpl._region = name;
 
-  _.each(['created', 'materialized', 'rendered', 'destroyed'], function (hook) {
+  _.each(['viewCreated', 'viewReady', 'viewDestroyed'], function (hook) {
     hook = capitalize(hook);
     tmpl['on' + hook](function (dynamicTemplate) {
       // "this" is the view instance
       var view = this;
-      self._runRegionHooks('on' + 'Region' + hook, view, dynamicTemplate);
+      var regionHook = ({
+        viewCreated: "regionCreated",
+        viewReady: "regionRendered",
+        viewDestroyed: "regionDestroyed"
+      })[hook];
+      self._runRegionHooks('on' + regionHook, view, dynamicTemplate);
     });
   });
 
@@ -283,7 +287,7 @@ if (typeof Template !== 'undefined') {
    *      {{> yield "footer"}}
    *    </footer>
    */
-  UI.registerHelper('yield', Template.__create__('yield', function () {
+  UI.registerHelper('yield', new Template('yield', function () {
     var layout = findFirstLayout(this);
 
     if (!layout)
@@ -330,7 +334,7 @@ if (typeof Template !== 'undefined') {
    * Note: The helper is a UI.Component object instead of a function so that
    * Meteor UI does not create a Deps.Dependency.
    */
-  UI.registerHelper('contentFor', Template.__create__('contentFor', function () {
+  UI.registerHelper('contentFor', new Template('contentFor', function () {
     var layout = findFirstLayout(this);
 
     if (!layout)
@@ -376,7 +380,7 @@ if (typeof Template !== 'undefined') {
    *    {{/if}}
    */
   UI.registerHelper('hasRegion', function (region) {
-    var layout = findFirstLayout(Blaze.getCurrentView());
+    var layout = findFirstLayout(Blaze.getView());
 
     if (!layout)
       throw new Error("No Iron.Layout found so you can't use hasRegion!");
@@ -399,7 +403,7 @@ if (typeof Template !== 'undefined') {
    *    {{/contentFor}}
    *  {{/Layout}}
    */
-  UI.registerHelper('Layout', Template.__create__('layout', function () {
+  UI.registerHelper('Layout', new Template('layout', function () {
     var args = Iron.DynamicTemplate.args(this);
 
     var layout = new Layout({
