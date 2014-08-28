@@ -5,7 +5,7 @@ Package.describe({
 });
 
 Package.on_use(function (api) {
-  api.versionsFrom('METEOR-CORE@0.9.1');
+  api.versionsFrom('METEOR@0.9.1');
 
   // so our default_layout gets compiled
   api.use('templating');
