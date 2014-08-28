@@ -43,8 +43,7 @@ var withDiv = function (callback) {
 var withRenderedTemplate = function (template, callback) {
   withDiv(function (el) {
     template = _.isString(template) ? Template[template] : template;
-    var range = Blaze.render(template);
-    range.attach(el);
+    Blaze.render(template, el);
     Deps.flush();
     callback(el);
   });
@@ -111,7 +110,7 @@ Tinytest.add('Layout - data - with in context trumps layout data', function (tes
 
 Tinytest.add('Layout - data - render always clears data', function (test) {
   var layout = new Iron.Layout;
-  
+
   withRenderedTemplate(layout.create(), function (el) {
     layout.template('LayoutOne');
     layout.render('One', {data: 'firstData'});
