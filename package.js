@@ -1,6 +1,6 @@
 Package.describe({
   summary: 'Dynamic layouts which enable rendering dynamic templates into regions on a page.',
-  version: '0.4.0',
+  version: '0.4.0-blaze-preview',
   git: 'https://github.com/eventedmind/iron-layout'
 });
 
