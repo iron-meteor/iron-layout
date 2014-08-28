@@ -1,11 +1,11 @@
 Package.describe({
   summary: 'Dynamic layouts which enable rendering dynamic templates into regions on a page.',
-  version: '0.4.0-blaze-preview',
+  version: '0.4.0-rc0',
   git: 'https://github.com/eventedmind/iron-layout'
 });
 
 Package.on_use(function (api) {
-  api.versionsFrom('METEOR@0.9.0.1-blaze-preview');
+  api.versionsFrom('METEOR@0.9.1-rc1');
 
   // so our default_layout gets compiled
   api.use('templating');
@@ -18,7 +18,7 @@ Package.on_use(function (api) {
   api.imply('iron:core');
 
   // dynamic templates
-  api.use('iron:dynamic-template@0.4.0');
+  api.use('iron:dynamic-template@0.4.0-rc0');
 
   // if you use iron-layout you should get iron-dynamic-template for free!
   api.imply('iron:dynamic-template');

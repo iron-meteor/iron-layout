@@ -2,15 +2,15 @@
   "dependencies": [
     [
       "blaze",
-      "1.0.3"
+      "2.0.0-rc0"
     ],
     [
       "deps",
-      "1.0.1"
+      "1.0.2-rc0"
     ],
     [
       "ejson",
-      "1.0.0"
+      "1.0.1-rc0"
     ],
     [
       "geojson-utils",
@@ -30,7 +30,7 @@
     ],
     [
       "iron:dynamic-template",
-      "0.4.0"
+      "0.4.0-rc0"
     ],
     [
       "jquery",
@@ -42,15 +42,15 @@
     ],
     [
       "meteor",
-      "1.0.2"
+      "1.0.3-rc0"
     ],
     [
       "minimongo",
-      "1.0.1"
+      "1.0.2-rc0"
     ],
     [
       "observe-sequence",
-      "1.0.1"
+      "1.0.2-rc0"
     ],
     [
       "ordered-dict",
@@ -62,15 +62,19 @@
     ],
     [
       "reactive-var",
-      "1.0.0"
+      "1.0.1-rc0"
     ],
     [
       "templating",
-      "1.0.4"
+      "1.0.5-rc0"
+    ],
+    [
+      "tracker",
+      "1.0.2-rc0"
     ],
     [
       "ui",
-      "1.0.0"
+      "1.0.1-rc0"
     ],
     [
       "underscore",
