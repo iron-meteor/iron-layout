@@ -333,6 +333,11 @@ if (typeof Template !== 'undefined') {
    *
    * Note: The helper is a UI.Component object instead of a function so that
    * Meteor UI does not create a Deps.Dependency.
+   *
+   * XXX what happens if the parent that calls contentFor gets destroyed?
+   * XXX the layout.region should be reset to be empty?
+   * XXX but how do we control order of setting the region? what if it gets destroyed but then something else sets it?
+   *
    */
   UI.registerHelper('contentFor', new Template('contentFor', function () {
     var layout = findFirstLayout(this);
