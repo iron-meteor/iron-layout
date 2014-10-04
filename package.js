@@ -19,6 +19,7 @@ Package.on_use(function (api) {
 
   // dynamic templates
   api.use('iron:dynamic-template@1.0.0-pre3');
+  api.imply('iron:dynamic-template');
 
   // if you use iron-layout you should get iron-dynamic-template for free!
   api.imply('iron:dynamic-template');
