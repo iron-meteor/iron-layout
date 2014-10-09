@@ -113,6 +113,8 @@ Layout.prototype.render = function (template, options) {
   // set the data for the region. If options.data is not defined, this will 
   // clear the data, which is what we want
   dynamicTemplate.data(options.data);
+
+  return dynamicTemplate;
 };
 
 /**
