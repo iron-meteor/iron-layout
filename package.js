@@ -13,6 +13,7 @@ Package.on_use(function (api) {
 
   // some utils
   api.use('underscore');
+  api.use('tracker'); // for Deps
 
   api.use('iron:core@1.0.0-pre3');
   api.imply('iron:core');
