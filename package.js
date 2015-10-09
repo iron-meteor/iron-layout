@@ -1,7 +1,8 @@
 Package.describe({
   summary: 'Dynamic layouts which enable rendering dynamic templates into regions on a page.',
   version: '1.0.0-pre3',
-  git: 'https://github.com/eventedmind/iron-layout'
+  git: 'https://github.com/eventedmind/iron-layout',
+  name: 'iron:layout'
 });
 
 Package.on_use(function (api) {
